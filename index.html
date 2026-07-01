@@ -732,14 +732,27 @@ async function loadStatusFromSheet() {
                             `status-tag ${cell.status === '報廢' ? 'scrap' : cell.status === '送修' ? 'repair' : 'broken'}` :
                             '';
                         const statusText = cell.status || '';
-                        html += `
-                            <td class="tool-cell ${isChecked ? 'checked' : ''}" data-id="${id}">
-                                <div class="tool-inner">
-                                    ${cell.label}
-                                    ${statusText ? `<span class="${statusClass}">${statusText}</span>` : ''}
-                                </div>
-                            </td>
-                        `;
+                        
+html += `
+    <td class="tool-cell ${isChecked ? 'checked' : ''}" data-id="${id}">
+        <div class="tool-inner">
+            ${cell.label}
+
+            ${statusText ? `
+                <span class="${statusClass}">
+                    ${statusText}
+                </span>
+            ` : ''}
+
+            ${cell.note ? `
+                <div class="tool-note">
+                    ${cell.note}
+                </div>
+            ` : ''}
+        </div>
+    </td>
+`;
+
                     }
                 });
                 html += '</tr>';
