@@ -481,6 +481,9 @@
         // - 工具: { type: 'tool', id: '...', label: '...', status: '' }
         // - 空: null
         // ============================================================
+       
+        const API_URL =
+        "https://script.google.com/macros/s/AKfycbxDOxy4uka3-5jdxPYN8X2U9CTr8IpQh2L_Wos-wWrzBHYpTwbUI0UBFV8NqYMT5AA4/exec";      
         const tableData = [
             // 列 0
             [
@@ -670,6 +673,49 @@
         // ============================================================
         const tableEl = document.getElementById('toolTable');
 
+async function loadStatusFromSheet() {
+
+    const response = await fetch(API_URL);
+    const sheetData = await response.json();
+
+    const statusMap = {};
+
+    sheetData.forEach(item => {
+
+        const toolId = item["編號"].split(" ")[0];
+
+        statusMap[toolId] = {
+            status: item["狀態"],
+            note: item["備註"]
+        };
+
+    });
+
+    tableData.forEach(row => {
+
+        row.forEach(cell => {
+
+            if (!cell) return;
+            if (cell.type !== "tool") return;
+
+            if (statusMap[cell.id]) {
+
+                cell.status =
+                    statusMap[cell.id].status;
+
+                cell.note =
+                    statusMap[cell.id].note;
+
+            }
+
+        });
+
+    });
+
+    renderTable();
+
+}
+
         function renderTable() {
             let html = '';
             tableData.forEach((row, rowIdx) => {
@@ -812,7 +858,7 @@
         // ============================================================
         // 8. 啟動
         // ============================================================
-        renderTable();
+        loadStatusFromSheet();
     </script>
 
 </body>
