@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>工具清點系統</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft JhengHei', sans-serif;
+        }
+
+        body {
+            background: #f5f7fb;
+            margin: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 30px 25px 40px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+            gap: 16px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a2634;
+            letter-spacing: 1px;
+        }
+
+        .header .progress {
+            font-size: 16px;
+            background: #eef1f6;
+            padding: 8px 20px;
+            border-radius: 40px;
+            color: #1a2634;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header .progress span {
+            font-weight: 700;
+            color: #2b7a4b;
+        }
+
+        .toolbar {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 28px;
+            border: none;
+            border-radius: 40px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #1a2634;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #2d3e52;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 38, 52, 0.2);
+        }
+
+        .btn-success {
+            background: #2b7a4b;
+            color: white;
+        }
+        .btn-success:hover {
+            background: #1f5f3a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(43, 122, 75, 0.25);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #1a2634;
+            border: 2px solid #d0d7e2;
+        }
+        .btn-outline:hover {
+            background: #eef1f6;
+            border-color: #b0b9c9;
+        }
+
+        .btn-danger {
+            background: #c0392b;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #a93226;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(192, 57, 43, 0.25);
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border-radius: 14px;
+            border: 1px solid #e9edf3;
+            background: #fafbfc;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            table-layout: fixed;
+            min-width: 820px;
+        }
+
+        th,
+        td {
+            border: 1px solid #e0e5ed;
+            text-align: center;
+            vertical-align: middle;
+            padding: 0;
+            height: 56px;
+            font-size: 14px;
+            background-color: white;
+            transition: background-color 0.15s;
+        }
+
+        /* 標題儲存格 */
+        .cell-title {
+            background: #eef1f6;
+            font-weight: 700;
+            color: #1a2634;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            padding: 0 6px;
+            white-space: nowrap;
+        }
+
+        /* 空儲存格 */
+        .cell-empty {
+            background: #fafbfc;
+        }
+
+        /* 工具方塊 */
+        .tool-cell {
+            cursor: pointer;
+            user-select: none;
+            padding: 4px 2px;
+            position: relative;
+            min-width: 52px;
+            background-color: #ffffff;
+            transition: background-color 0.15s, box-shadow 0.15s;
+        }
+
+        .tool-cell .tool-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.3;
+            padding: 4px 2px;
+            border-radius: 6px;
+            min-height: 44px;
+            transition: background-color 0.15s;
+            font-weight: 500;
+            color: #1a2634;
+            word-break: break-word;
+        }
+
+        /* 已確認狀態 */
+        .tool-cell.checked .tool-inner {
+            background-color: #2b7a4b;
+            color: white;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+        }
+
+        .tool-cell.checked .tool-inner .status-tag {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+        }
+
+        .tool-cell:hover:not(.checked) .tool-inner {
+            background-color: #f0f4fe;
+        }
+
+        .tool-cell.checked:hover .tool-inner {
+            background-color: #1f5f3a;
+        }
+
+        /* 狀態標籤 (送修/報廢) */
+        .status-tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 8px;
+            border-radius: 20px;
+            background: #f1c40f;
+            color: #1a2634;
+            display: inline-block;
+            margin-top: 2px;
+            letter-spacing: 0.3px;
+            line-height: 1.5;
+        }
+
+        .status-tag.broken {
+            background: #e67e22;
+            color: white;
+        }
+
+        .status-tag.scrap {
+            background: #c0392b;
+            color: white;
+        }
+
+        .status-tag.repair {
+            background: #f39c12;
+            color: white;
+        }
+
+        /* 結果彈窗 */
+        .result-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .result-overlay.show {
+            display: flex;
+        }
+
+        .result-modal {
+            background: white;
+            border-radius: 24px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 80vh;
+            padding: 32px 36px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-modal h2 {
+            margin: 0 0 8px 0;
+            font-size: 24px;
+            color: #1a2634;
+        }
+
+        .result-modal .sub {
+            color: #6b7a8f;
+            font-size: 15px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eef1f6;
+            padding-bottom: 14px;
+        }
+
+        .result-modal .missing-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .result-modal .missing-item {
+            background: #f0f2f5;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: 500;
+            color: #1a2634;
+            border: 1px solid #e0e5ed;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .result-modal .missing-item .tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 1px 8px;
+            border-radius: 20px;
+            background: #f1c40f;
+            color: #1a2634;
+        }
+
+        .result-modal .missing-item .tag.broken {
+            background: #e67e22;
+            color: white;
+        }
+        .result-modal .missing-item .tag.scrap {
+            background: #c0392b;
+            color: white;
+        }
+        .result-modal .missing-item .tag.repair {
+            background: #f39c12;
+            color: white;
+        }
+
+        .result-modal .empty-msg {
+            color: #6b7a8f;
+            font-size: 18px;
+            padding: 30px 0;
+            text-align: center;
+        }
+
+        .result-modal .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 24px;
+            padding-top: 18px;
+            border-top: 2px solid #eef1f6;
+        }
+
+        /* 響應式 */
+        @media (max-width: 700px) {
+            .container {
+                padding: 16px 12px;
+            }
+            .header h1 {
+                font-size: 22px;
+            }
+            .header .progress {
+                font-size: 14px;
+                padding: 6px 14px;
+            }
+            .toolbar {
+                justify-content: center;
+            }
+            .btn {
+                padding: 8px 18px;
+                font-size: 14px;
+            }
+            .result-modal {
+                padding: 24px 18px;
+            }
+            table {
+                font-size: 12px;
+                min-width: 600px;
+            }
+            th,
+            td {
+                height: 44px;
+                padding: 2px;
+            }
+            .tool-cell .tool-inner {
+                font-size: 12px;
+                min-height: 34px;
+                padding: 2px 1px;
+            }
+            .status-tag {
+                font-size: 9px;
+                padding: 0 6px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px 6px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            .header h1 {
+                font-size: 20px;
+                text-align: center;
+            }
+            .header .progress {
+                justify-content: center;
+            }
+            table {
+                font-size: 10px;
+                min-width: 480px;
+            }
+            th,
+            td {
+                height: 36px;
+                padding: 1px;
+            }
+            .tool-cell .tool-inner {
+                font-size: 10px;
+                min-height: 28px;
+                padding: 1px;
+                border-radius: 4px;
+            }
+            .status-tag {
+                font-size: 7px;
+                padding: 0 4px;
+            }
+            .btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 標題 & 進度 -->
+        <div class="header">
+            <h1>🔧 工具清點系統</h1>
+            <div class="progress">
+                ✅ 已確認 <span id="checkedCount">0</span> / <span id="totalCount">0</span>
+            </div>
+        </div>
+
+        <!-- 工具列 -->
+        <div class="toolbar">
+            <button class="btn btn-outline" id="resetBtn">⟳ 全部重置</button>
+            <button class="btn btn-success" id="checkBtn">✔ 清點完畢</button>
+        </div>
+
+        <!-- 表格 -->
+        <div class="table-wrap">
+            <table id="toolTable">
+                <!-- 由 JavaScript 動態生成 -->
+            </table>
+        </div>
+    </div>
+
+    <!-- 結果彈窗 -->
+    <div class="result-overlay" id="resultOverlay">
+        <div class="result-modal">
+            <h2>📋 清點結果</h2>
+            <div class="sub" id="resultSub">以下工具尚未確認：</div>
+            <div id="missingList" class="missing-list"></div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" id="closeResultBtn">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // 1. 數據定義 — 二維陣列 (16 列 × 11 欄)
+        // - 標題: { type: 'title', text: '...' }
+        // - 工具: { type: 'tool', id: '...', label: '...', status: '' }
+        // - 空: null
+        // ============================================================
+        const tableData = [
+            // 列 0
+            [
+                { type: 'title', text: 'BYPASS PIN' },
+                { type: 'tool', id: 'A1', label: 'A1' },
+                { type: 'tool', id: 'A2', label: 'A2' },
+                { type: 'tool', id: 'A3', label: 'A3' },
+                { type: 'tool', id: 'A4', label: 'A4' },
+                { type: 'tool', id: 'A5', label: 'A5' },
+                { type: 'tool', id: 'A6', label: 'A6' },
+                { type: 'tool', id: 'A8', label: 'A8' },
+                { type: 'tool', id: 'A9', label: 'A9' },
+                null,
+                null,
+            ],
+            // 列 1
+            [
+                null,
+                { type: 'tool', id: 'B1', label: 'B1' },
+                { type: 'tool', id: 'B2', label: 'B2' },
+                { type: 'tool', id: 'B3', label: 'B3' },
+                { type: 'tool', id: 'B4', label: 'B4' },
+                { type: 'tool', id: 'B5', label: 'B5' },
+                { type: 'tool', id: 'B6', label: 'B6' },
+                null,
+                null,
+                null,
+                null,
+            ],
+            // 列 2 (空行)
+            [null, null, null, null, null, null, null, null, null, null, null],
+            // 列 3 — 耳機
+            [
+                { type: 'title', text: '耳機' },
+                { type: 'tool', id: 'H1', label: 'H1' },
+                { type: 'tool', id: 'H2', label: 'H2' },
+                { type: 'tool', id: 'H3', label: 'H3' },
+                { type: 'tool', id: 'H4', label: 'H4' },
+                { type: 'tool', id: 'H7', label: 'H7' },
+                { type: 'tool', id: 'R111', label: 'R111' },
+                null,
+                null,
+                null,
+                null,
+            ],
+            // 列 4 — AW1~AW6
+            [
+                null,
+                { type: 'tool', id: 'AW1', label: 'AW1', status: '送修' },
+                { type: 'tool', id: 'AW2', label: 'AW2' },
+                { type: 'tool', id: 'AW3', label: 'AW3', status: '送修' },
+                { type: 'tool', id: 'AW4', label: 'AW4', status: '送修' },
+                { type: 'tool', id: 'AW5', label: 'AW5' },
+                { type: 'tool', id: 'AW6', label: 'AW6' },
+                null,
+                null,
+                null,
+                null,
+            ],
+            // 列 5 — AW7~AW11
+            [
+                null,
+                { type: 'tool', id: 'AW7', label: 'AW7' },
+                { type: 'tool', id: 'AW8', label: 'AW8' },
+                { type: 'tool', id: 'AW9', label: 'AW9' },
+                { type: 'tool', id: 'AW10', label: 'AW10' },
+                { type: 'tool', id: 'AW11', label: 'AW11' },
+                null,
+                null,
+                null,
+                null,
+                null,
+            ],
+            // 列 6 (空行)
+            [null, null, null, null, null, null, null, null, null, null, null],
+            // 列 7 — 無線電 W1~W10
+            [
+                { type: 'title', text: '無線電' },
+                { type: 'tool', id: 'W1', label: 'W1' },
+                { type: 'tool', id: 'W2', label: 'W2' },
+                { type: 'tool', id: 'W3', label: 'W3' },
+                { type: 'tool', id: 'W4', label: 'W4' },
+                { type: 'tool', id: 'W5', label: 'W5' },
+                { type: 'tool', id: 'W6', label: 'W6' },
+                { type: 'tool', id: 'W7', label: 'W7' },
+                { type: 'tool', id: 'W8', label: 'W8' },
+                { type: 'tool', id: 'W9', label: 'W9' },
+                { type: 'tool', id: 'W10', label: 'W10' },
+            ],
+            // 列 8 — W11~W17
+            [
+                null,
+                { type: 'tool', id: 'W11', label: 'W11' },
+                { type: 'tool', id: 'W12', label: 'W12' },
+                { type: 'tool', id: 'W13', label: 'W13' },
+                { type: 'tool', id: 'W14', label: 'W14' },
+                { type: 'tool', id: 'W15', label: 'W15' },
+                { type: 'tool', id: 'W16', label: 'W16' },
+                { type: 'tool', id: 'W17', label: 'W17' },
+                null,
+                null,
+                null,
+            ],
+            // 列 9 (空行)
+            [null, null, null, null, null, null, null, null, null, null, null],
+            // 列 10 — IPAD NO.1~NO.10
+            [
+                { type: 'title', text: 'IPAD' },
+                { type: 'tool', id: 'PC40600', label: 'PC40600<br>NO.1' },
+                { type: 'tool', id: 'PC40601', label: 'PC40601<br>NO.2' },
+                { type: 'tool', id: 'PC40602', label: 'PC40602<br>NO.3' },
+                { type: 'tool', id: 'PC40603', label: 'PC40603<br>NO.4' },
+                { type: 'tool', id: 'PC40604', label: 'PC40604<br>NO.5' },
+                { type: 'tool', id: 'PC40605', label: 'PC40605<br>NO.6' },
+                { type: 'tool', id: 'PC40606', label: 'PC40606<br>NO.7' },
+                { type: 'tool', id: 'PC40607', label: 'PC40607<br>NO.8' },
+                { type: 'tool', id: 'PC40608', label: 'PC40608<br>NO.9' },
+                { type: 'tool', id: 'PC40609', label: 'PC40609<br>NO.10' },
+            ],
+            // 列 11 — NO.11~NO.20
+            [
+                null,
+                { type: 'tool', id: 'PC25198', label: 'PC25198<br>NO.11' },
+                { type: 'tool', id: 'PC25209', label: 'PC25209<br>NO.12' },
+                { type: 'tool', id: 'PC25210', label: 'PC25210<br>NO.13' },
+                { type: 'tool', id: 'PC25211', label: 'PC25211<br>NO.14', status: '報廢' },
+                { type: 'tool', id: 'PC25212', label: 'PC25212<br>NO.15' },
+                { type: 'tool', id: 'PC25217', label: 'PC25217<br>NO.16' },
+                { type: 'tool', id: 'PC26417', label: 'PC26417<br>隨機NO.17' },
+                { type: 'tool', id: 'PC26415', label: 'PC26415<br>隨機NO.18' },
+                { type: 'tool', id: 'PC26377', label: 'PC26377<br>隨機NO.19' },
+                { type: 'tool', id: 'PC26376', label: 'PC26376<br>隨機NO.20' },
+            ],
+            // 列 12 (空行)
+            [null, null, null, null, null, null, null, null, null, null, null],
+            // 列 13 — 手電筒 L1~L8
+            [
+                { type: 'title', text: '手電筒' },
+                { type: 'tool', id: 'L1', label: 'L1' },
+                { type: 'tool', id: 'L2', label: 'L2' },
+                { type: 'tool', id: 'L3', label: 'L3' },
+                { type: 'tool', id: 'L4', label: 'L4' },
+                { type: 'tool', id: 'L5', label: 'L5' },
+                { type: 'tool', id: 'L6', label: 'L6' },
+                { type: 'tool', id: 'L7', label: 'L7' },
+                { type: 'tool', id: 'L8', label: 'L8' },
+                null,
+                null,
+            ],
+            // 列 14 — L9~L15
+            [
+                null,
+                { type: 'tool', id: 'L9', label: 'L9' },
+                { type: 'tool', id: 'L10', label: 'L10' },
+                { type: 'tool', id: 'L11', label: 'L11' },
+                { type: 'tool', id: 'L12', label: 'L12' },
+                { type: 'tool', id: 'L13', label: 'L13' },
+                { type: 'tool', id: 'L14', label: 'L14' },
+                { type: 'tool', id: 'L15', label: 'L15' },
+                null,
+                null,
+                null,
+            ],
+            // 列 15 (空行)
+            [null, null, null, null, null, null, null, null, null, null, null],
+        ];
+
+        // ============================================================
+        // 2. 狀態管理
+        // ============================================================
+        // 所有工具 id → 是否已確認
+        const checkedMap = new Map();
+
+        // 收集所有工具 ID
+        const allToolIds = [];
+        tableData.forEach(row => {
+            row.forEach(cell => {
+                if (cell && cell.type === 'tool') {
+                    allToolIds.push(cell.id);
+                    checkedMap.set(cell.id, false);
+                }
+            });
+        });
+
+        // ============================================================
+        // 3. 渲染表格
+        // ============================================================
+        const tableEl = document.getElementById('toolTable');
+
+        function renderTable() {
+            let html = '';
+            tableData.forEach((row, rowIdx) => {
+                html += '<tr>';
+                row.forEach((cell, colIdx) => {
+                    if (cell === null) {
+                        html += `<td class="cell-empty"></td>`;
+                    } else if (cell.type === 'title') {
+                        html += `<td class="cell-title">${cell.text}</td>`;
+                    } else if (cell.type === 'tool') {
+                        const id = cell.id;
+                        const isChecked = checkedMap.get(id) || false;
+                        const statusClass = cell.status ?
+                            `status-tag ${cell.status === '報廢' ? 'scrap' : cell.status === '送修' ? 'repair' : 'broken'}` :
+                            '';
+                        const statusText = cell.status || '';
+                        html += `
+                            <td class="tool-cell ${isChecked ? 'checked' : ''}" data-id="${id}">
+                                <div class="tool-inner">
+                                    ${cell.label}
+                                    ${statusText ? `<span class="${statusClass}">${statusText}</span>` : ''}
+                                </div>
+                            </td>
+                        `;
+                    }
+                });
+                html += '</tr>';
+            });
+            tableEl.innerHTML = html;
+
+            // 綁定點擊事件 (委託)
+            tableEl.querySelectorAll('.tool-cell').forEach(td => {
+                td.addEventListener('click', function(e) {
+                    const id = this.dataset.id;
+                    if (!id) return;
+                    const current = checkedMap.get(id) || false;
+                    checkedMap.set(id, !current);
+                    this.classList.toggle('checked', !current);
+                    updateProgress();
+                });
+            });
+
+            updateProgress();
+        }
+
+        // ============================================================
+        // 4. 更新進度
+        // ============================================================
+        function updateProgress() {
+            let checked = 0;
+            for (const [id, val] of checkedMap) {
+                if (val) checked++;
+            }
+            document.getElementById('checkedCount').textContent = checked;
+            document.getElementById('totalCount').textContent = allToolIds.length;
+        }
+
+        // ============================================================
+        // 5. 重置
+        // ============================================================
+        function resetAll() {
+            for (const id of allToolIds) {
+                checkedMap.set(id, false);
+            }
+            // 更新 UI
+            tableEl.querySelectorAll('.tool-cell').forEach(td => {
+                td.classList.remove('checked');
+            });
+            updateProgress();
+        }
+
+        // ============================================================
+        // 6. 清點完畢 — 顯示未確認
+        // ============================================================
+        function showMissing() {
+            const missing = [];
+            // 遍歷所有工具，找出未確認的
+            tableData.forEach(row => {
+                row.forEach(cell => {
+                    if (cell && cell.type === 'tool') {
+                        const id = cell.id;
+                        if (!checkedMap.get(id)) {
+                            missing.push(cell);
+                        }
+                    }
+                });
+            });
+
+            const overlay = document.getElementById('resultOverlay');
+            const listEl = document.getElementById('missingList');
+            const subEl = document.getElementById('resultSub');
+
+            if (missing.length === 0) {
+                listEl.innerHTML = `<div class="empty-msg">🎉 所有工具已確認完畢！</div>`;
+                subEl.textContent = '太棒了，沒有任何遺漏！';
+            } else {
+                subEl.textContent = `以下 ${missing.length} 個工具尚未確認：`;
+                let itemsHtml = '';
+                missing.forEach(tool => {
+                    let statusTag = '';
+                    if (tool.status) {
+                        const cls = tool.status === '報廢' ? 'scrap' : tool.status === '送修' ? 'repair' : 'broken';
+                        statusTag = `<span class="tag ${cls}">${tool.status}</span>`;
+                    }
+                    // 將 label 中的 <br> 換成空格以便顯示
+                    const labelText = tool.label.replace(/<br>/g, ' ');
+                    itemsHtml += `<span class="missing-item">${labelText} ${statusTag}</span>`;
+                });
+                listEl.innerHTML = itemsHtml;
+            }
+
+            overlay.classList.add('show');
+        }
+
+        // ============================================================
+        // 7. 事件綁定
+        // ============================================================
+        document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+        document.getElementById('checkBtn').addEventListener('click', showMissing);
+
+        document.getElementById('closeResultBtn').addEventListener('click', function() {
+            document.getElementById('resultOverlay').classList.remove('show');
+        });
+
+        // 點擊遮罩關閉
+        document.getElementById('resultOverlay').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+
+        // ESC 鍵關閉
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                document.getElementById('resultOverlay').classList.remove('show');
+            }
+        });
+
+        // ============================================================
+        // 8. 啟動
+        // ============================================================
+        renderTable();
+    </script>
+
+</body>
+</html>
