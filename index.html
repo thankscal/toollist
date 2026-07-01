@@ -761,14 +761,48 @@ html += `
 
             // 綁定點擊事件 (委託)
             tableEl.querySelectorAll('.tool-cell').forEach(td => {
-                td.addEventListener('click', function(e) {
-                    const id = this.dataset.id;
-                    if (!id) return;
-                    const current = checkedMap.get(id) || false;
-                    checkedMap.set(id, !current);
-                    this.classList.toggle('checked', !current);
-                    updateProgress();
-                });
+               
+td.addEventListener('click', async function(e) {
+
+    const id = this.dataset.id;
+
+    if (!id) return;
+
+    const password =
+        prompt("請輸入管理密碼");
+
+    if (!password) return;
+
+    const status =
+        prompt("請輸入狀態\n正常 / 送修 / 報廢");
+
+    if (!status) return;
+
+    const note =
+        prompt("請輸入備註") || "";
+
+    const url =
+        API_URL +
+        "?action=update" +
+        "&id=" + encodeURIComponent(id) +
+        "&status=" + encodeURIComponent(status) +
+        "&note=" + encodeURIComponent(note) +
+        "&password=" + encodeURIComponent(password);
+
+    const response = await fetch(url);
+
+    const result = await response.json();
+
+    alert(result.message);
+
+    if(result.success){
+
+        await loadStatusFromSheet();
+
+    }
+
+});
+
             });
 
             updateProgress();
