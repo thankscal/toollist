@@ -850,14 +850,23 @@ if (!isAdmin) {
     return;
 }
 
+
 const status =
     prompt("請輸入狀態\n正常 / 送修 / 報廢");
 
+if (!status) return;
 
-    if (!status) return;
+let note = "";
 
-    const note =
+if (
+    confirm("是否需要填寫備註？")
+) {
+
+    note =
         prompt("請輸入備註") || "";
+
+}
+
 
     
 
