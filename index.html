@@ -837,47 +837,52 @@ html += `
             // 綁定點擊事件 (委託)
             tableEl.querySelectorAll('.tool-cell').forEach(td => {
                
+
 td.addEventListener('click', async function(e) {
 
     const id = this.dataset.id;
 
     if (!id) return;
-   
-if (!isAdmin) {
 
-    alert("請先登入管理模式");
+    // 未登入 = 清點模式
+    if (!isAdmin) {
 
-    return;
-}
+        const current =
+            checkedMap.get(id);
 
+        checkedMap.set(id, !current);
 
-const status =
-    prompt("請輸入狀態\n正常 / 送修 / 報廢");
+        this.classList.toggle("checked");
 
-if (!status) return;
+        updateProgress();
 
-let note = "";
+        return;
+    }
 
-if (
-    confirm("是否需要填寫備註？")
-) {
+    // 管理模式
+    const status =
+        prompt("請輸入狀態\n正常 / 送修 / 報廢");
 
-    note =
-        prompt("請輸入備註") || "";
+    if (!status) return;
 
-}
-  
+    let note = "";
 
-const url =
-    API_URL +
-    "?action=update" +
-    "&id=" + encodeURIComponent(id) +
-    "&status=" + encodeURIComponent(status) +
-    "&note=" + encodeURIComponent(note) +
-    "&password=1314";
+    if (
+        confirm("是否要輸入備註？\n按取消可略過")
+    ) {
 
+        note =
+            prompt("請輸入備註") || "";
 
+    }
 
+    const url =
+        API_URL +
+        "?action=update" +
+        "&id=" + encodeURIComponent(id) +
+        "&status=" + encodeURIComponent(status) +
+        "&note=" + encodeURIComponent(note) +
+        "&password=1314";
 
     const response = await fetch(url);
 
@@ -885,13 +890,14 @@ const url =
 
     alert(result.message);
 
-    if(result.success){
+    if (result.success) {
 
         await loadStatusFromSheet();
 
     }
 
 });
+
 
             });
 
