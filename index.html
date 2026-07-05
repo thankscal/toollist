@@ -448,6 +448,28 @@
             </div>
         </div>
 
+<!-- 管理登入 -->
+<div class="admin-bar">
+
+    <input
+        type="password"
+        id="adminPassword"
+        placeholder="管理密碼">
+
+    <button
+        class="btn btn-primary"
+        onclick="loginAdmin()">
+
+        管理登入
+
+    </button>
+
+    <span id="adminStatus">
+        ❌ 未登入
+    </span>
+
+</div>
+
         <!-- 工具列 -->
         <div class="toolbar">
             <button class="btn btn-outline" id="resetBtn">⟳ 全部重置</button>
@@ -483,7 +505,34 @@
         // ============================================================
        
         const API_URL =
-        "https://script.google.com/macros/s/AKfycbxDOxy4uka3-5jdxPYN8X2U9CTr8IpQh2L_Wos-wWrzBHYpTwbUI0UBFV8NqYMT5AA4/exec";      
+        "https://script.google.com/macros/s/AKfycbxDOxy4uka3-5jdxPYN8X2U9CTr8IpQh2L_Wos-wWrzBHYpTwbUI0UBFV8NqYMT5AA4/exec"; 
+
+let isAdmin = false;
+
+function loginAdmin() {
+
+    const password =
+        document.getElementById("adminPassword").value;
+
+    if (password === "1234") {
+
+        isAdmin = true;
+
+        document.getElementById("adminStatus")
+            .textContent = "✅ 管理模式";
+
+    } else {
+
+        isAdmin = false;
+
+        document.getElementById("adminStatus")
+            .textContent = "❌ 密碼錯誤";
+
+        alert("密碼錯誤");
+    }
+}
+
+        
         const tableData = [
             // 列 0
             [
