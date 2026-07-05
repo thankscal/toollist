@@ -860,6 +860,7 @@ const status =
         prompt("請輸入備註") || "";
 
     
+
 const url =
     API_URL +
     "?action=update" +
@@ -867,6 +868,7 @@ const url =
     "&status=" + encodeURIComponent(status) +
     "&note=" + encodeURIComponent(note) +
     "&password=1314";
+
 
 
     const response = await fetch(url);
