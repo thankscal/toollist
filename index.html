@@ -537,7 +537,7 @@ function loginAdmin() {
     const password =
         document.getElementById("adminPassword").value;
 
-    if (password === "1234") {
+    if (password === "1314") {
 
         isAdmin = true;
 
@@ -841,13 +841,21 @@ td.addEventListener('click', async function(e) {
     if (!id) return;
 
    
+
 const id = this.dataset.id;
 
 if (!id) return;
 
+if (!isAdmin) {
 
-    const status =
-        prompt("請輸入狀態\n正常 / 送修 / 報廢");
+    alert("請先登入管理模式");
+
+    return;
+}
+
+const status =
+    prompt("請輸入狀態\n正常 / 送修 / 報廢");
+
 
     if (!status) return;
 
@@ -860,7 +868,7 @@ if (!id) return;
         "&id=" + encodeURIComponent(id) +
         "&status=" + encodeURIComponent(status) +
         "&note=" + encodeURIComponent(note) +
-        "&password=" + encodeURIComponent(password);
+       "&password=1314";
 
     const response = await fetch(url);
 
