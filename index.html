@@ -537,14 +537,17 @@ function loginAdmin() {
     const password =
         document.getElementById("adminPassword").value;
 
-    if (password === "1314") {
+    
+if (password === "1314") {
 
-        isAdmin = true;
+    isAdmin = true;
 
-        document.getElementById("adminStatus")
-            .textContent = "✅ 管理模式";
+    document.getElementById("adminStatus")
+        .textContent = "✅ 管理模式";
 
-    } else {
+    alert("登入成功");
+}
+ else {
 
         isAdmin = false;
 
@@ -839,13 +842,7 @@ td.addEventListener('click', async function(e) {
     const id = this.dataset.id;
 
     if (!id) return;
-
    
-
-const id = this.dataset.id;
-
-if (!id) return;
-
 if (!isAdmin) {
 
     alert("請先登入管理模式");
@@ -862,13 +859,15 @@ const status =
     const note =
         prompt("請輸入備註") || "";
 
-    const url =
-        API_URL +
-        "?action=update" +
-        "&id=" + encodeURIComponent(id) +
-        "&status=" + encodeURIComponent(status) +
-        "&note=" + encodeURIComponent(note) +
-       "&password=1314";
+    
+const url =
+    API_URL +
+    "?action=update" +
+    "&id=" + encodeURIComponent(id) +
+    "&status=" + encodeURIComponent(status) +
+    "&note=" + encodeURIComponent(note) +
+    "&password=1314";
+
 
     const response = await fetch(url);
 
