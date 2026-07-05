@@ -840,10 +840,11 @@ td.addEventListener('click', async function(e) {
 
     if (!id) return;
 
-    const password =
-        prompt("請輸入管理密碼");
+   
+const id = this.dataset.id;
 
-    if (!password) return;
+if (!id) return;
+
 
     const status =
         prompt("請輸入狀態\n正常 / 送修 / 報廢");
